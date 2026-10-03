@@ -109,3 +109,15 @@ For design work, confirm the change matches `prototypes/AIRTIME-16/v2`.
 
 `HANDOVER.md` records current state, verified work and what is left. Update it
 whenever state changes.
+
+## Work item discipline (agent directives)
+
+- **Always re-retrieve a work item immediately before reporting on it or acting
+  on it.** State seen earlier may be stale - fetch the item again, then act, and
+  quote the fields you saw.
+- **Always link work items directly.** Every mention of a work item in any reply
+  carries a clickable link to the item in the format
+  `[PROJ-32 - Short title](https://plane.atakumi.net/{workspace}/projects/{project-uuid}/issues/<work-item-uuid>/)`.
+  No link means an incomplete answer.
+
+**Repository workflow:** `C:\Users\mdver\Projects\_STANDARD\WORKFLOW.md` - canonical branch/finish sequence; supersedes conflicting prose in this file.
