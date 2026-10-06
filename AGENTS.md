@@ -21,9 +21,9 @@ Plane.
 Work is tracked in Plane: workspace **`atakumi`**, project **Airtime**, identifier **`AIRTIME`**. Ids live in `.plane.json` — that file is the only authoritative source for the workspace.
 
 - **Identifiers are automatic.** Plane assigns the next number (`AIRTIME-42`). Never choose, invent or reuse one.
-- **Estimates** use the Fibonacci scale (`1, 2, 3, 5, 8, 13, 21`) and are written to the work item's `point` field. 21 or above means split it.
+- Estimates are Fibonacci points (1, 2, 3, 5, 8, 13) set via the project's estimate system (`estimate_point`); above 13 means split.
 - **Lifecycle:** Backlog → Prepare → Todo → In Progress → Blocked → In Review → Approved → Deployed to stage → Approved by client → In production → Done / Cancelled.
-- **Approval is human.** An agent moves work and records evidence; it never approves, and never moves an item past **In Review** without a recorded human approval. On this Plane build there are no custom fields: approvals use the `needs-approval` / `approved` labels plus a comment in the fixed form `Approval: <what> v<n> | by <email> | <YYYY-MM-DD>`. Designs link to features as **child** items.
+- **Approval is human.** An agent moves work and records evidence; it never approves, and never moves an item past **In Review** without a recorded human approval. On this Plane build there are no custom fields: approval is the item's state - a human moves it from **In Review** to **Approved** or later; labels and comments are not required. Designs link to features as **child** items.
 - **Pickup:** only items assigned to `martijn+opencode@atakumi.com` in **Todo**. Set **In Progress** before changing anything; never touch a ticket that is not yours.
 - **Workspace is confirmed, never assumed.** Never infer a workspace from another repo, an old config, or a previous session.
 

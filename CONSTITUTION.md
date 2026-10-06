@@ -40,14 +40,11 @@ work; Plane records where work stands.
 
 - Work-item identifiers are assigned automatically by Plane. Never choose,
   invent or reuse one. Branches are named after their item (`feature/AIRTIME-33`).
-- Estimates use the Fibonacci scale (`1, 2, 3, 5, 8, 13, 21`) and are recorded
-  in the work item's `point` field. Anything at 21 or above is split.
+- Estimates are Fibonacci points (1, 2, 3, 5, 8, 13) set via the project's estimate system (`estimate_point`); above 13 means split.
 - The lifecycle is: Backlog → Prepare → Todo → In Progress → Blocked →
   In Review → Approved → Deployed to stage → Approved by client →
   In production → Done / Cancelled.
-- This Plane build has no custom fields or relations: approvals are the
-  `needs-approval` / `approved` labels plus a fixed-form comment, and a design
-  links to its feature as a **child** item.
+- This Plane build has no custom fields or relations: approval is the item's state - a human moves it from **In Review** to **Approved** or later; labels and comments are not required; a design links to its feature as a **child** item.
 - Every mention of a work item carries its clickable Plane link.
 
 ## Article IV — Security and secrets
