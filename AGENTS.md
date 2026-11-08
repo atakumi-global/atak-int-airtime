@@ -249,31 +249,31 @@ projects and work items from Plane (per-user API token, encrypted at rest) and
 adds time-and-materials budgets, rates, burn and export on top — without changing
 Plane.
 
-- **Repo:** https://github.com/atakumi-global/airtime
-- **Plane project:** `AIRTIME` — see `.plane.json`
+- **Repo:** https://github.com/atakumi-global/atak-int-airtime
+- **Plane project:** `INTAIRTIME` — see `.plane.json`
 - **Branch flow:** `dev` (default) → `stage` → `prod`, promoted only by the manual
   **Promote to stage** / **Promote to prod** workflows (production approved in the
   GitHub `prod` environment).
 - **Data policy:** `standard` — see `atakumi-global/factory-config`
-- **Knowledge base:** https://github.com/atakumi-global/kb-atak-airtime
+- **Knowledge base:** https://github.com/atakumi-global/kb-atak-int-airtime
 
 ## Plane — this project
 
 The Plane rules (lifecycle, estimates, approval by state, pickup, links) are in the
 factory standard section above. Project specifics:
 
-- Workspace **`atakumi`**, project **Airtime**, identifier **`AIRTIME`**; ids in
+- Workspace **`atakumi`**, project **Airtime**, identifier **`INTAIRTIME`**; ids in
   `.plane.json`.
 - **Pickup:** items assigned to `martijn+agent@atakumi.com` in **Todo**.
 - Designs link to their feature as **child** items.
 
 ### Links — always clickable
 
-- Base `https://plane.atakumi.net`; workspace `atakumi`, project `AIRTIME` (`e7756e01-aeaf-4c66-9dfe-cc189a792546`).
+- Base `https://plane.atakumi.net`; workspace `atakumi`, project `INTAIRTIME` (`e7756e01-aeaf-4c66-9dfe-cc189a792546`).
 - **Issue list:** `https://plane.atakumi.net/atakumi/projects/e7756e01-aeaf-4c66-9dfe-cc189a792546/issues/`
 - **Work item:** that path plus `{work-item-uuid}/` — trailing slash is fine. The bare project root 404s, so link the `/issues/` list instead.
-- **Format:** `[AIRTIME-32 — Short title](https://plane.atakumi.net/atakumi/projects/e7756e01-aeaf-4c66-9dfe-cc189a792546/issues/<work-item-uuid>/)`
-- The work-item UUID is the item's `id` field (`workitem retrieve`, or `retrieve_by_identifier`). The human identifier (`AIRTIME-32`) is not in the URL.
+- **Format:** `[INTAIRTIME-32 — Short title](https://plane.atakumi.net/atakumi/projects/e7756e01-aeaf-4c66-9dfe-cc189a792546/issues/<work-item-uuid>/)`
+- The work-item UUID is the item's `id` field (`workitem retrieve`, or `retrieve_by_identifier`). The human identifier (`INTAIRTIME-32`) is not in the URL.
 - Every mention of a work item in a reply carries its link. No link means an incomplete answer.
 
 ## Stack
@@ -291,8 +291,8 @@ factory standard section above. Project specifics:
 ```
 server/                    Fastify API + PostgreSQL schema + tests
 desktop/                   Tauri v2 Windows client (Vite + React)
-prototypes/AIRTIME-16/v1   coded design artifacts (superseded)
-prototypes/AIRTIME-16/v2   coded design artifacts — the APPROVED set
+prototypes/INTAIRTIME-16/v1   coded design artifacts (superseded)
+prototypes/INTAIRTIME-16/v2   coded design artifacts — the APPROVED set
 design-system/DESIGN.md    binding visual contract
 air.ps1                    local stack: PostgreSQL + dev server
 stack.sh                   local stack on Linux, agent server and dev preview (factory STACK.md)
@@ -333,7 +333,7 @@ npm run lint && npm run typecheck && npm test && npm run build
 cd desktop && npm run lint && npm test && npm run build
 ```
 
-For design work, confirm the change matches `prototypes/AIRTIME-16/v2`.
+For design work, confirm the change matches `prototypes/INTAIRTIME-16/v2`.
 
 ## Conventions
 
@@ -348,7 +348,7 @@ For design work, confirm the change matches `prototypes/AIRTIME-16/v2`.
 
 ## Design
 
-- `prototypes/AIRTIME-16/v2` is the approved coded design set — implement against
+- `prototypes/INTAIRTIME-16/v2` is the approved coded design set — implement against
   it, not from memory.
 - `design-system/DESIGN.md` is the binding contract; the target is **WCAG 2.2 AA**
   in both light and dark.

@@ -6,22 +6,22 @@ where the build stands, what is verified, and what is left.
 ## Branch and state
 
 - Branch model: `dev` (GitHub default) -> `stage` -> `prod`, promoted by the
-  manual **Promote to stage** / **Promote to prod** actions. `prototypes/AIRTIME-16`
+  manual **Promote to stage** / **Promote to prod** actions. `prototypes/INTAIRTIME-16`
   keeps the coded design artifacts; GitHub Pages is disabled.
-- Work sits on a local stack: `feature/AIRTIME-31` -> `feature/AIRTIME-32` ->
-  `feature/AIRTIME-33` (current), based on `dev` at `9c80586`. Nothing is
+- Work sits on a local stack: `feature/INTAIRTIME-31` -> `feature/INTAIRTIME-32` ->
+  `feature/INTAIRTIME-33` (current), based on `dev` at `9c80586`. Nothing is
   pushed; `dev`, `stage` and `prod` are unchanged.
 - Working tree clean after this handover is committed.
 - Local stack is up and healthy: PostgreSQL container and the dev server
   (`.\air.ps1 status` reports `/health` ok).
 - Work is tracked in Plane — workspace `atakumi`, project **Airtime**
-  (`AIRTIME`); ids in `.plane.json`. Standard docs: `AGENTS.md`,
+  (`INTAIRTIME`); ids in `.plane.json`. Standard docs: `AGENTS.md`,
   `CONSTITUTION.md`, `design-system/DESIGN.md`.
 
 ## What was completed
 
 The server (v1.1–v1.8) was already built. This session completed the Windows
-desktop client to the approved coded designs in `prototypes/AIRTIME-16/v2`, closing
+desktop client to the approved coded designs in `prototypes/INTAIRTIME-16/v2`, closing
 the v1.3–v1.8 client criteria.
   (`/health` reports ok). A browser preview also works (`npm run dev` on
   `http://localhost:5173`); the API client falls back to the web fetch outside
@@ -35,14 +35,14 @@ the duration parser, the week/month timesheet view and bulk row entry.
 
 | Commit | Work |
 | --- | --- |
-| `2b6075e` | Duration parser, `DurationInput`, wired into back-fill and edit (AIRTIME-31) |
-| `2346c0e` | Review change: top-aligned date/duration, quick chips removed (AIRTIME-31) |
-| `fbd69ab` | `GET /api/time-entries/summary`: costed entries and period totals (AIRTIME-32) |
-| `d4b97c8` | Desktop types, `ApiClient.timesheet`, `loadTimesheet`, `periodRange` (AIRTIME-32) |
-| `cc77cc5` | Week/month timesheet screen with stats, table and states (AIRTIME-32) |
+| `2b6075e` | Duration parser, `DurationInput`, wired into back-fill and edit (INTAIRTIME-31) |
+| `2346c0e` | Review change: top-aligned date/duration, quick chips removed (INTAIRTIME-31) |
+| `fbd69ab` | `GET /api/time-entries/summary`: costed entries and period totals (INTAIRTIME-32) |
+| `d4b97c8` | Desktop types, `ApiClient.timesheet`, `loadTimesheet`, `periodRange` (INTAIRTIME-32) |
+| `cc77cc5` | Week/month timesheet screen with stats, table and states (INTAIRTIME-32) |
 | `0dfba9f` | Use the web fetch outside Tauri so the browser preview can sign in |
-| `53628f5` | The timesheet replaces My time, keeping the name (AIRTIME-32) |
-| `c7e977e` | Bulk row entry with save-all and keyboard flow (AIRTIME-33) |
+| `53628f5` | The timesheet replaces My time, keeping the name (INTAIRTIME-32) |
+| `c7e977e` | Bulk row entry with save-all and keyboard flow (INTAIRTIME-33) |
 
 Installer built (earlier session):
 
@@ -60,13 +60,13 @@ actions, `HANDOVER.md` tracked.
   authorisation, audit log, Plane sync, time tracking, budgets/rates/burn,
   multi-currency, CSV export, feedback capture. 41 tests.
 - `desktop/` — Tauri v2, React, TypeScript. The Windows client.
-- `prototypes/AIRTIME-16/v1` and `v2` — coded design artifacts (static HTML,
+- `prototypes/INTAIRTIME-16/v1` and `v2` — coded design artifacts (static HTML,
   multi-currency, CSV export, feedback capture, and the timesheet summary
   endpoint with read-time costing. 45 tests.
 - `desktop/` — Tauri v2, React, TypeScript. The Windows client. My time is the
   week/month timesheet with bulk entry; the duration parser is shared by the
   timesheet, back-fill dialog and entry edit.
-- `design/AIRTIME-16/v1` and `v2` — coded design artifacts (static HTML,
+- `design/INTAIRTIME-16/v1` and `v2` — coded design artifacts (static HTML,
   light/dark, WCAG 2.2 AA target). `v2` is the approved set.
 - `air.ps1` — brings up PostgreSQL and the dev server locally.
 
@@ -92,7 +92,7 @@ Sign in as the bootstrap administrator from `.env` and check:
   `1d` (8h), `1w` (40h), `0.5d`, `+15m`; parsed value echoed; save blocked while
   invalid.
 - **Projects** — set or edit a budget per project; budget health, burn and flags.
-- **Rates** — dated member, project and project + member rates plus an administrator-set default hourly rate (AIRTIME-89); client rates are removed.
+- **Rates** — dated member, project and project + member rates plus an administrator-set default hourly rate (INTAIRTIME-89); client rates are removed.
 - **Reports** — filter by date/project/member and export CSV.
 - **Admin** — add/role/remove members, read the audit log, review and export the
   anonymised feedback dataset.
@@ -119,25 +119,25 @@ Done `463fbefb`.
 
 ### Done and signed off
 
-AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
+INTAIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
 
 ### In Progress
 
-- **AIRTIME-2** (epic) — closes when its children close.
-- **AIRTIME-6** v1.4 budgets, rates, burn — meets its child criteria and awaits
+- **INTAIRTIME-2** (epic) — closes when its children close.
+- **INTAIRTIME-6** v1.4 budgets, rates, burn — meets its child criteria and awaits
   the PO moving it to Done. Caveat: the epic criterion "manager opens the
   project" is served by the Projects list, not a project detail screen; that is
-  AIRTIME-43.
+  INTAIRTIME-43.
 
 ### In Review
 
-- **AIRTIME-34** paused timer state — `POST /api/timer/pause` and `/resume`,
+- **INTAIRTIME-34** paused timer state — `POST /api/timer/pause` and `/resume`,
   migration `009_timer_pause`, timer bar Pause/Resume and paused state; the
   desktop context exposes `timerState` (`idle`, `running`, `paused`),
-  `pauseTimer` and `resumeTimer` for the tray work (AIRTIME-35–37). The tray
+  `pauseTimer` and `resumeTimer` for the tray work (INTAIRTIME-35–37). The tray
   itself is not part of this item.
 
-- **AIRTIME-35** system tray and close-to-tray — `desktop/src-tauri/src/tray/`
+- **INTAIRTIME-35** system tray and close-to-tray — `desktop/src-tauri/src/tray/`
   (`model.rs`, `icon.rs`, `mod.rs`), frameless window with the 36px
   `TitleBar` and live mini-timer, `TrayBridge` mirroring `timerState` into the
   tray. The Tauri v2 Windows capability matrix is recorded in
@@ -147,9 +147,9 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   window; right-click menu shows the state's primary action; Close hides to the
   tray and the running timer keeps counting in the tray tooltip and menu;
   Quit Airtime exits; title bar drags, double-click maximises, controls work.
-  AIRTIME-36 and 37 add modules beside `tray/`.
+  INTAIRTIME-36 and 37 add modules beside `tray/`.
 
-- **AIRTIME-36** desktop notifications with actions — desktop only.
+- **INTAIRTIME-36** desktop notifications with actions — desktop only.
   `desktop/src-tauri/src/notify/` (`model.rs` pure, `mod.rs` Windows toast glue
   on `tauri-winrt-notification`, new Windows-only dependency),
   `NotificationBridge` + `lib/notifications.ts` on the web side. Success "Entry
@@ -163,7 +163,7 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   "Timer stopped unexpectedly" with Restart; check a release build shows the
   Airtime name and icon.
 
-- **AIRTIME-37** shortcut help surface and remaining shortcuts — desktop only.
+- **INTAIRTIME-37** shortcut help surface and remaining shortcuts — desktop only.
   `lib/shortcuts.ts` holds the map (Ctrl+Alt+T timer, Ctrl+Alt+B back-fill,
   Ctrl+K search work items, Ctrl+Alt+S timesheet, Ctrl+Alt+M tray menu,
   Ctrl+Enter save) and `state/ShortcutsContext.tsx` the bindings, stored per
@@ -177,24 +177,24 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
 
 ### Not fully done
 
-- **AIRTIME-27** PDF export — not started; needs a template review and a server
-  PDF library. Blocks AIRTIME-69 (invoicing).
-- **AIRTIME-28** multi-workspace sync — not started; sized L.
-- **AIRTIME-25** track expenses — built (migration `010_expenses`, `/api/projects/:id/expenses`, `/api/expenses/:id`, cost and CSV export include expenses, desktop Expenses panel and dialog); In Review.
-- **AIRTIME-11–15** future activity capture — backlog by design.
-- **AIRTIME-17–24** Design 1–8 — coded work exists in `prototypes/AIRTIME-16/v2`,
+- **INTAIRTIME-27** PDF export — not started; needs a template review and a server
+  PDF library. Blocks INTAIRTIME-69 (invoicing).
+- **INTAIRTIME-28** multi-workspace sync — not started; sized L.
+- **INTAIRTIME-25** track expenses — built (migration `010_expenses`, `/api/projects/:id/expenses`, `/api/expenses/:id`, cost and CSV export include expenses, desktop Expenses panel and dialog); In Review.
+- **INTAIRTIME-11–15** future activity capture — backlog by design.
+- **INTAIRTIME-17–24** Design 1–8 — coded work exists in `prototypes/INTAIRTIME-16/v2`,
   but the tickets are still Todo; they need a decision to close, not code.
-- **AIRTIME-30, 35–52, 54, 56** — the rest of the QA-audit batch. High-priority
+- **INTAIRTIME-30, 35–52, 54, 56** — the rest of the QA-audit batch. High-priority
   missing items: 42 (Price, Profit and targets), 43 (project detail).
-- **AIRTIME-57–70** — the newer roadmap batch, untouched.
-- **AIRTIME-33 follow-up** — the PO-added bulk update/delete was descoped; it
-  needs AIRTIME-64's lock state and a selection design.
-- Copy-last-week, split and duplicate (PO additions to AIRTIME-32) were
+- **INTAIRTIME-57–70** — the newer roadmap batch, untouched.
+- **INTAIRTIME-33 follow-up** — the PO-added bulk update/delete was descoped; it
+  needs INTAIRTIME-64's lock state and a selection design.
+- Copy-last-week, split and duplicate (PO additions to INTAIRTIME-32) were
   descoped for the same reason: no design reference.
 
 ### Dev preview
 
-- **AIRTIME-95** (dev preview did not start) — root cause was in `stack.sh`, not in a
+- **INTAIRTIME-95** (dev preview did not start) — root cause was in `stack.sh`, not in a
   migration: the preview's Postgres container was running and healthy but had lost its
   published port 3502, and `docker compose up --wait` accepted it. `stack.sh start` now
   checks that the database port listens and otherwise recreates the services (volumes
@@ -202,29 +202,29 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
 
 ## Remaining work, in order
 
-1. Push the stack (`feature/AIRTIME-31`..`33`) and open PRs into `dev`; promote
+1. Push the stack (`feature/INTAIRTIME-31`..`33`) and open PRs into `dev`; promote
    when the build is signed off.
-2. AIRTIME-42 Price/Profit/targets: record the two open definitions first
+2. INTAIRTIME-42 Price/Profit/targets: record the two open definitions first
    (how Profit is defined, whether the margin target is an amount or a
    percentage), then build.
-3. AIRTIME-43 project detail screen (needs 42 for the five-number summary; also
-   closes the AIRTIME-6 caveat).
-4. AIRTIME-27 PDF export: template, then generation.
-5. AIRTIME-28 multi-workspace: built (server and desktop), awaiting review.
+3. INTAIRTIME-43 project detail screen (needs 42 for the five-number summary; also
+   closes the INTAIRTIME-6 caveat).
+4. INTAIRTIME-27 PDF export: template, then generation.
+5. INTAIRTIME-28 multi-workspace: built (server and desktop), awaiting review.
 6. Remaining QA-audit items (30, 34–52, 54, 56).
-7. Ask the PO to move AIRTIME-6 to Done.
+7. Ask the PO to move INTAIRTIME-6 to Done.
 
 ## Decisions and assumptions
 
-- AIRTIME-90 workspace access: a member sees and enters time on a Plane project
+- INTAIRTIME-90 workspace access: a member sees and enters time on a Plane project
   only while Plane lists them as a member of it (their own token). History stays
   visible but frozen. A SHA-256 over the member's project memberships
   (`plane_connections.access_hash`) is the permission-change check before time
   entry. Administrators see all projects; managers only theirs. Details in
-  README "Workspace access". AIRTIME-28 builds on `connectionWorkspaces()` and
+  README "Workspace access". INTAIRTIME-28 builds on `connectionWorkspaces()` and
   `project_access`.
 
-- AIRTIME-28 multi-workspace: a connection (base URL + account token) reads a
+- INTAIRTIME-28 multi-workspace: a connection (base URL + account token) reads a
   list of workspace slugs (`plane_connection_workspaces`, migration 013); each
   slug is verified alone and one failure never stops the rest. Projects and work
   items carry `workspace_slug`; webhooks are per workspace (Plane stores
@@ -233,11 +233,11 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   keep working. Plane UUIDs are primary keys generated per record
   (`BaseModel.id = UUIDField(default=uuid4, unique=True)`), so the existing
   `(organisation_id, plane_*_id)` keys stay. Archived projects are synced,
-  flagged and refuse new time. Visibility follows AIRTIME-90 (project
+  flagged and refuse new time. Visibility follows INTAIRTIME-90 (project
   membership; administrators see all). Totals per project and per workspace.
   Details in README "Plane connection and sync".
 
-- AIRTIME-16 v2 is the approved design; screens were implemented without
+- INTAIRTIME-16 v2 is the approved design; screens were implemented without
   per-screen checkpoints, then reviewed.
 - My time is now the week/month timesheet; the earlier day-list screen was
   removed.
@@ -250,7 +250,7 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   Shift+Enter keeps the work item, Ctrl+Enter/Save N saves every valid row and
   leaves invalid rows inline with errors. Draft rows preview Billable (10-minute
   floor) and show Cost as `—`; there is no focusable Billable control until
-  AIRTIME-41.
+  INTAIRTIME-41.
 - Bulk saves are one POST per row with a single refresh afterwards; network
   failures queue each row and leave the grid.
 - Entry date/duration edits are sent as `startedAt`/`endedAt`; the server derives
@@ -267,9 +267,9 @@ AIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
 
 ## Resume
 
-- Next build: `/work-issue AIRTIME-42` (record the two definitions first), then
-  `/work-issue AIRTIME-43`.
-- Also queued: `/work-issue AIRTIME-27`, `/work-issue AIRTIME-28`.
-- Approvals: move AIRTIME-6 to Done.
-- Publish: push `feature/AIRTIME-31`..`33` and PR into `dev`, then run the
+- Next build: `/work-issue INTAIRTIME-42` (record the two definitions first), then
+  `/work-issue INTAIRTIME-43`.
+- Also queued: `/work-issue INTAIRTIME-27`, `/work-issue INTAIRTIME-28`.
+- Approvals: move INTAIRTIME-6 to Done.
+- Publish: push `feature/INTAIRTIME-31`..`33` and PR into `dev`, then run the
   manual **Promote to stage** / **Promote to prod** actions when signed off.

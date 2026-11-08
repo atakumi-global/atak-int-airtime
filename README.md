@@ -8,15 +8,15 @@ Plane.
 This repository currently contains the **Airtime server** (`server/`): the
 service that owns shared state - accounts, roles, projects, rates, budgets and
 time entries - plus its PostgreSQL schema, OIDC/local sign-in, role-based access
-control, financial audit log and Docker deployment (work item `AIRTIME-3`,
+control, financial audit log and Docker deployment (work item `INTAIRTIME-3`,
 v1.1). It reads projects and work items from Plane using a per-user API token,
 stored encrypted at rest, kept fresh by webhooks and a polling fallback (work
-item `AIRTIME-4`, v1.2). It records time with a one-timer-per-member start/stop
+item `INTAIRTIME-4`, v1.2). It records time with a one-timer-per-member start/stop
 and manual back-fill, a 10-minute billable minimum and a full edit history
-(work item `AIRTIME-5`, v1.3). The **Windows desktop client** lives in
-`desktop/` (work item `AIRTIME-9`, v1.7) and is described further down.
+(work item `INTAIRTIME-5`, v1.3). The **Windows desktop client** lives in
+`desktop/` (work item `INTAIRTIME-9`, v1.7) and is described further down.
 
-The coded design system and product screens live under `prototypes/AIRTIME-16/v2`.
+The coded design system and product screens live under `prototypes/INTAIRTIME-16/v2`.
 
 ## Prerequisites
 
@@ -166,7 +166,7 @@ opens directly in Excel. Expenses follow the time rows with `source` set to
 `currency`, and two extra columns, `type` (`time` or `expense`) and `category`.
 A `memberId` filter leaves expenses out.
 
-PDF export is deferred to AIRTIME-27 in the backlog so its layout gets a visual
+PDF export is deferred to INTAIRTIME-27 in the backlog so its layout gets a visual
 review first.
 
 ## Feedback capture
@@ -184,7 +184,7 @@ dataset with `GET /api/feedback/export`.
 ## Desktop client (Windows)
 
 `desktop/` is the Tauri v2 + React + TypeScript client, ported from the coded
-designs in `prototypes/AIRTIME-16/v2`. It signs in to the Airtime server, caches
+designs in `prototypes/INTAIRTIME-16/v2`. It signs in to the Airtime server, caches
 projects, work items, entries and the running timer to disk so the first screen
 renders before any network call, queues back-filled entries while the server is
 unreachable, and keeps the session token in Windows Credential Manager - never
@@ -205,7 +205,7 @@ rates); Reports with filtered CSV export; Admin (members and roles, audit log,
 anonymised feedback review and export); Settings (account, feedback opt-in, FX
 status and refresh, reporting currency, Plane connect and sync).
 
-PDF export is deferred to AIRTIME-27 so its layout gets a visual review first;
+PDF export is deferred to INTAIRTIME-27 so its layout gets a visual review first;
 CSV is the supported export in this release.
 
 Checks: `npm test`, `npm run build`, `npm run lint`. The Rust side builds with
@@ -279,7 +279,7 @@ the audit log with actor and timestamp.
 ## Plane connection and sync
 
 `PUT /api/plane/connection` takes `baseUrl`, `workspaceSlugs` (a list) and a Plane
-personal API token (AIRTIME-28). One account token covers every workspace its
+personal API token (INTAIRTIME-28). One account token covers every workspace its
 user can reach, but Plane has no token-authenticated endpoint that lists
 workspaces, so the member names the slugs. Slugs are trimmed, de-duplicated
 case-insensitively, validated against Plane's slug rule (letters, digits, `-`,

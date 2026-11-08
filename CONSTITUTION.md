@@ -35,11 +35,11 @@ problem, scope, and testable acceptance criteria before implementation begins.
 ## Article III — Plane is the source of truth
 
 Lifecycle, estimates and approval live in Plane for the project named in
-`.plane.json` — workspace `atakumi`, project `AIRTIME`. Documents describe how to
+`.plane.json` — workspace `atakumi`, project `INTAIRTIME`. Documents describe how to
 work; Plane records where work stands.
 
 - Work-item identifiers are assigned automatically by Plane. Never choose,
-  invent or reuse one. Branches are named after their item (`feature/AIRTIME-33`).
+  invent or reuse one. Branches are named after their item (`feature/INTAIRTIME-33`).
 - Estimates use the Fibonacci scale (`1, 2, 3, 5, 8, 13`) in the project's
   estimate system (`estimate_point`). Anything above 13 is split. The legacy
   `point` field is read-only history.
@@ -90,7 +90,7 @@ The minimum change that satisfies the criteria, nothing speculative.
 Any design outcome — new or changed screen, layout, styling, user-visible copy,
 interaction — is designed, reviewed and approved before it is implemented.
 
-- `prototypes/AIRTIME-16/v2` is the approved coded design set; `v1` is history.
+- `prototypes/INTAIRTIME-16/v2` is the approved coded design set; `v1` is history.
 - `design-system/DESIGN.md` is the enforceable summary.
 - Designs are versioned records under `prototypes/<work-item-id>/v1`, `v2`, …
   A previous version is never overwritten or edited.
