@@ -78,8 +78,9 @@
 - Never claim a check you did not run. If something was skipped, say so.
 - **Tester's guide.** Every item that moves to **In Review** gets a Plane comment
   `## How to test` with **Where** (environment, exact URL or build and how to open it,
-  e.g. `review <project> start`), **Before you start** (the login: account, role and its password or where that
-  password is written down for that environment, so anyone can test without asking;
+  e.g. `review <project> start`), **Before you start** (the login: the factory dev login for the role,
+  `admin@factory.test`, password in Vaultwarden under "factory/dev-login" (STACK.md 8),
+  never the password itself, so anyone can test without asking;
   plus test data),
   numbered **Steps** (real menu labels, buttons and sample values), **Expected** (what
   the tester sees after each step, matching the acceptance criteria) and **Not covered**
