@@ -237,6 +237,16 @@ INTAIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   membership; administrators see all). Totals per project and per workspace.
   Details in README "Plane connection and sync".
 
+- INTAIRTIME-100 reduced Plane polling: connect and manual sync still read every
+  work item, but a poll and a webhook read only what changed. Plane's Community
+  API (the instance runs v1.4.2) rejects the `filters`/`pql` parameters and has
+  no `updated_at` filter, so `PlaneClient.listIssues(projectId, since)` requests
+  `order_by=-updated_at` with a small page and stops paging at the first item
+  older than the workspace's `last_synced_at` minus `SYNC_LOOKBACK_SECONDS`
+  (default 600). A workspace that has never synced is read in full, so a quiet
+  project costs one small request instead of its whole history. Details in README
+  "Plane connection and sync".
+
 - INTAIRTIME-16 v2 is the approved design; screens were implemented without
   per-screen checkpoints, then reviewed.
 - My time is now the week/month timesheet; the earlier day-list screen was

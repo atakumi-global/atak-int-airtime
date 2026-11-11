@@ -101,6 +101,16 @@ export function normalizeBaseUrl(baseUrl: string): string {
 
 const CLOSED_GROUPS = new Set(['completed', 'cancelled']);
 
+/**
+ * How many work items an incremental read asks for at once. A full read uses
+ * Plane's default page size; an incremental read uses a small first page so a
+ * quiet project costs one small request rather than the whole list.
+ */
+const INCREMENTAL_ISSUE_PAGE_SIZE = 100;
+
+/** A cursor page can never run away: 100 pages is far more than a real sync needs. */
+const MAX_PAGES = 100;
+
 export function isIssueOpen(issue: PlaneIssue): boolean {
   if (issue.completed_at || issue.archived_at) {
     return false;
@@ -138,28 +148,48 @@ export class PlaneClient {
     return response.json();
   }
 
+  /** Builds a query string, leaving out empty parameters. */
+  private query(params: Record<string, string | undefined>): string {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== '') {
+        search.set(key, value);
+      }
+    }
+    const text = search.toString();
+    return text ? `?${text}` : '';
+  }
+
+  /**
+   * Reads one page and returns its items plus the cursor for the next page, if
+   * Plane says there is one. Handles both the bare-array and the paginated shape.
+   */
+  private readPage<T>(body: unknown): { items: T[]; nextCursor: string | null } {
+    if (Array.isArray(body)) {
+      return { items: body as T[], nextCursor: null };
+    }
+    const pageBody = body as {
+      results?: T[];
+      next_cursor?: string | null;
+      next_page_results?: boolean;
+    };
+    const items = Array.isArray(pageBody.results) ? pageBody.results : [];
+    const nextCursor =
+      pageBody.next_page_results && pageBody.next_cursor ? pageBody.next_cursor : null;
+    return { items, nextCursor };
+  }
+
   private async paginate<T>(path: string): Promise<T[]> {
     const results: T[] = [];
     let cursor: string | null = null;
-    for (let page = 0; page < 100; page += 1) {
-      const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
-      const body = await this.getJson(`${path}${query}`);
-      if (Array.isArray(body)) {
-        results.push(...(body as T[]));
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const body = await this.getJson(`${path}${this.query({ cursor: cursor ?? undefined })}`);
+      const { items, nextCursor } = this.readPage<T>(body);
+      results.push(...items);
+      if (!nextCursor) {
         break;
       }
-      const pageBody = body as {
-        results?: T[];
-        next_cursor?: string | null;
-        next_page_results?: boolean;
-      };
-      if (Array.isArray(pageBody.results)) {
-        results.push(...pageBody.results);
-      }
-      if (!pageBody.next_page_results || !pageBody.next_cursor) {
-        break;
-      }
-      cursor = pageBody.next_cursor;
+      cursor = nextCursor;
     }
     return results;
   }
@@ -177,9 +207,51 @@ export class PlaneClient {
     );
   }
 
-  async listIssues(projectId: string): Promise<PlaneIssue[]> {
-    return this.paginate<PlaneIssue>(
-      `/workspaces/${encodeURIComponent(this.options.workspaceSlug)}/projects/${encodeURIComponent(projectId)}/issues/`,
-    );
+  /**
+   * Lists a project's work items.
+   *
+   * With no `since` this is a full read of the project, in Plane's own order.
+   *
+   * With `since` it is an incremental read: Plane is asked for the items ordered
+   * by `updated_at` descending (most recently changed first) and only a small
+   * first page. Paging stops as soon as an item older than `since` appears,
+   * because everything after it is older still. That way a quiet project costs
+   * one small request instead of its whole history, while every item changed
+   * since the watermark is still read. Plane's Community API has no
+   * `updated_at` filter, so ordering by `updated_at` and stopping early is the
+   * supported way to read only what changed.
+   */
+  async listIssues(projectId: string, since?: Date | null): Promise<PlaneIssue[]> {
+    const path = `/workspaces/${encodeURIComponent(this.options.workspaceSlug)}/projects/${encodeURIComponent(projectId)}/issues/`;
+    if (!since) {
+      return this.paginate<PlaneIssue>(path);
+    }
+    const sinceMs = since.getTime();
+    const results: PlaneIssue[] = [];
+    let cursor: string | null = null;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const body = await this.getJson(
+        `${path}${this.query({
+          order_by: '-updated_at',
+          per_page: String(INCREMENTAL_ISSUE_PAGE_SIZE),
+          cursor: cursor ?? undefined,
+        })}`,
+      );
+      const { items, nextCursor } = this.readPage<PlaneIssue>(body);
+      let reachedOlder = false;
+      for (const issue of items) {
+        const updatedMs = issue.updated_at ? Date.parse(issue.updated_at) : Number.NaN;
+        if (Number.isFinite(updatedMs) && updatedMs < sinceMs) {
+          reachedOlder = true;
+          continue;
+        }
+        results.push(issue);
+      }
+      if (reachedOlder || !nextCursor) {
+        break;
+      }
+      cursor = nextCursor;
+    }
+    return results;
   }
 }

@@ -40,6 +40,39 @@ export type SyncSummary = {
 const inFlight = new Map<string, Promise<SyncSummary>>();
 
 /**
+ * Triggers that read every work item of every project. An explicit connect or
+ * manual refresh is a full read; a poll or webhook reads only what changed
+ * since the workspace last synced.
+ */
+const FULL_SYNC_TRIGGERS = new Set(['connect', 'manual']);
+
+export type SyncOptions = {
+  /** A webhook delivery names one workspace; only that one is read. */
+  onlyWorkspace?: string;
+  /** Seconds of overlap an incremental read keeps behind the last sync. */
+  lookbackSeconds?: number;
+};
+
+/** Seconds of overlap when the caller does not say: absorbs clock skew and slow reads. */
+export const DEFAULT_SYNC_LOOKBACK_SECONDS = 600;
+
+/**
+ * The instant an incremental read starts from: the workspace's last successful
+ * sync, pulled back by the lookback buffer. `null` means a full read (the
+ * workspace has never synced, so there is no watermark).
+ */
+export function incrementalSince(
+  lastSyncedAt: Date | null | undefined,
+  lookbackSeconds: number,
+): Date | null {
+  if (!lastSyncedAt) {
+    return null;
+  }
+  const lookbackMs = Math.max(0, lookbackSeconds) * 1000;
+  return new Date(lastSyncedAt.getTime() - lookbackMs);
+}
+
+/**
  * Syncs every workspace of the connection. With `onlyWorkspace` (a webhook
  * delivery names one workspace) just that one is read and the member's project
  * access is left to the next full sync or access check.
@@ -49,13 +82,13 @@ export function syncConnection(
   connection: PlaneConnectionRow,
   key: Buffer,
   trigger: string,
-  onlyWorkspace?: string,
+  options: SyncOptions = {},
 ): Promise<SyncSummary> {
   const running = inFlight.get(connection.id);
   if (running) {
     return running;
   }
-  const promise = performSync(db, connection, key, trigger, onlyWorkspace).finally(() => {
+  const promise = performSync(db, connection, key, trigger, options).finally(() => {
     inFlight.delete(connection.id);
   });
   inFlight.set(connection.id, promise);
@@ -168,12 +201,17 @@ type WorkspaceRead = {
   accessible: AccessibleProject[];
 };
 
-/** Reads one workspace completely. Throws on the first request that fails. */
+/**
+ * Reads one workspace. With `since` only work items changed at or after that
+ * instant are read; without it every work item is read. Throws on the first
+ * request that fails.
+ */
 async function syncWorkspace(
   db: Db,
   connection: PlaneConnectionRow,
   token: string,
   workspaceSlug: string,
+  since: Date | null,
 ): Promise<WorkspaceRead> {
   const client = new PlaneClient({
     baseUrl: connection.base_url,
@@ -191,7 +229,7 @@ async function syncWorkspace(
       workspaceSlug,
       project,
     );
-    const issues = await client.listIssues(project.id);
+    const issues = await client.listIssues(project.id, since);
     for (const issue of issues) {
       await upsertWorkItem(
         db,
@@ -220,8 +258,12 @@ async function performSync(
   connection: PlaneConnectionRow,
   key: Buffer,
   trigger: string,
-  onlyWorkspace?: string,
+  options: SyncOptions,
 ): Promise<SyncSummary> {
+  const onlyWorkspace = options.onlyWorkspace;
+  const lookbackSeconds = options.lookbackSeconds ?? DEFAULT_SYNC_LOOKBACK_SECONDS;
+  const incremental = !FULL_SYNC_TRIGGERS.has(trigger);
+
   const runId = randomUUID();
   await db.query(
     `INSERT INTO plane_sync_runs (id, organisation_id, connection_id, trigger, status)
@@ -249,7 +291,13 @@ async function performSync(
     // One workspace failing never stops the others.
     for (const workspaceSlug of slugs) {
       try {
-        const read = await syncWorkspace(db, connection, token, workspaceSlug);
+        const workspace = connection.workspaces.find(
+          (entry) => entry.slug.toLowerCase() === workspaceSlug.toLowerCase(),
+        );
+        const since = incremental
+          ? incrementalSince(workspace?.last_synced_at, lookbackSeconds)
+          : null;
+        const read = await syncWorkspace(db, connection, token, workspaceSlug, since);
         accessible.push(...read.accessible);
         projectCount += read.projects;
         workItems += read.workItems;

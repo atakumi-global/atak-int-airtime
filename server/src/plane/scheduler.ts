@@ -7,6 +7,7 @@ export function startSyncScheduler(
   db: Db,
   key: Buffer,
   intervalSeconds: number,
+  lookbackSeconds: number,
   log: FastifyBaseLogger,
 ): () => void {
   const runOnce = async (): Promise<void> => {
@@ -19,7 +20,7 @@ export function startSyncScheduler(
     }
     for (const connection of connections) {
       try {
-        await syncConnection(db, connection, key, 'poll');
+        await syncConnection(db, connection, key, 'poll', { lookbackSeconds });
       } catch (error) {
         log.warn(
           { err: error, connectionId: connection.id },

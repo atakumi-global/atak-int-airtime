@@ -46,6 +46,7 @@ try {
         db,
         parseEncryptionKey(config.tokenEncryptionKey),
         config.syncPollSeconds,
+        config.syncLookbackSeconds,
         app.log,
       ),
     );

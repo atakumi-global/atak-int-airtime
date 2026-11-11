@@ -33,6 +33,7 @@ export const testConfig: AppConfig = {
   tokenEncryptionKey: 'a'.repeat(64),
   corsOrigins: ['tauri://localhost', 'http://tauri.localhost'],
   syncPollSeconds: 0,
+  syncLookbackSeconds: 600,
   syncPollEnabled: false,
   accessRecheckSeconds: 0,
   accessMaxStaleSeconds: 3600,

@@ -285,7 +285,9 @@ export function planeRoutes(app: FastifyInstance, deps: PlaneRouteDeps): void {
         match.workspaceSlug;
 
       try {
-        const summary = await syncConnection(db, connection, key, 'webhook', scoped);
+        const summary = await syncConnection(db, connection, key, 'webhook', {
+          onlyWorkspace: scoped,
+        });
         return reply.code(202).send({ sync: summary });
       } catch (error) {
         return reply.code(502).send({

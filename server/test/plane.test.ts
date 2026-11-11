@@ -4,6 +4,7 @@ import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { FastifyInstance } from 'fastify';
 import { decryptToken, parseEncryptionKey } from '../src/crypto/tokens.js';
+import { syncConnection } from '../src/plane/sync.js';
 import { listActiveConnections } from '../src/services/connections.js';
 import {
   auth,
@@ -19,6 +20,46 @@ const VALID_TOKEN = 'plane_api_test_token';
 const OTHER_TOKEN = 'plane_api_other_token';
 
 type Recorded = { method: string; url: string };
+
+type MockIssue = {
+  id: string;
+  sequence_id: number;
+  name: string;
+  state_detail?: { group: string };
+  completed_at?: string | null;
+  updated_at?: string;
+};
+
+function recentIso(offsetMs: number): string {
+  return new Date(Date.now() - offsetMs).toISOString();
+}
+
+/** Two fresh work items (one completed), so a full read sees both. */
+function defaultIssues(): Record<string, MockIssue[]> {
+  const stamp = recentIso(30_000);
+  return {
+    p1: [
+      {
+        id: 'i1',
+        sequence_id: 1,
+        name: 'Fix login',
+        state_detail: { group: 'backlog' },
+        updated_at: stamp,
+      },
+      {
+        id: 'i2',
+        sequence_id: 2,
+        name: 'Ship it',
+        state_detail: { group: 'completed' },
+        completed_at: stamp,
+        updated_at: stamp,
+      },
+    ],
+    p2: [],
+  };
+}
+
+let projectIssues: Record<string, MockIssue[]> = defaultIssues();
 
 function startPlaneServer(): {
   server: Server;
@@ -42,35 +83,32 @@ function startPlaneServer(): {
       return;
     }
 
-    const url = request.url ?? '';
-    if (url.startsWith('/api/v1/workspaces/atakumi/projects/p1/issues/')) {
+    const parsed = new URL(`http://localhost${request.url ?? ''}`);
+    const issueMatch = /^\/api\/v1\/workspaces\/atakumi\/projects\/([^/]+)\/issues\/$/.exec(
+      parsed.pathname,
+    );
+    if (issueMatch) {
+      const items = (projectIssues[issueMatch[1]!] ?? []).slice();
+      if (parsed.searchParams.get('order_by') === '-updated_at') {
+        items.sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''));
+      }
+      const perPage = Math.max(
+        1,
+        Number(parsed.searchParams.get('per_page') ?? '1000') || 1000,
+      );
+      const cursor = parsed.searchParams.get('cursor');
+      const page = cursor ? Number(cursor.split(':')[1] ?? '0') || 0 : 0;
+      const start = page * perPage;
+      const slice = items.slice(start, start + perPage);
+      const hasMore = start + perPage < items.length;
       send(200, {
-        results: [
-          {
-            id: 'i1',
-            sequence_id: 1,
-            name: 'Fix login',
-            state_detail: { group: 'backlog' },
-            updated_at: '2026-09-01T10:00:00Z',
-          },
-          {
-            id: 'i2',
-            sequence_id: 2,
-            name: 'Ship it',
-            state_detail: { group: 'completed' },
-            completed_at: '2026-09-02T10:00:00Z',
-            updated_at: '2026-09-02T10:00:00Z',
-          },
-        ],
-        next_page_results: false,
+        results: slice,
+        next_cursor: hasMore ? `${perPage}:${page + 1}:0` : null,
+        next_page_results: hasMore,
       });
       return;
     }
-    if (url.startsWith('/api/v1/workspaces/atakumi/projects/p2/issues/')) {
-      send(200, { results: [], next_page_results: false });
-      return;
-    }
-    if (url.startsWith('/api/v1/workspaces/atakumi/projects/')) {
+    if (parsed.pathname.startsWith('/api/v1/workspaces/atakumi/projects/')) {
       send(200, {
         results: [
           { id: 'p1', identifier: 'WEB', name: 'Website', is_member: true, member_role: 20 },
@@ -102,6 +140,7 @@ before(async () => {
 
 beforeEach(async () => {
   await resetData();
+  projectIssues = defaultIssues();
   plane.requests.length = 0;
 });
 
@@ -230,6 +269,68 @@ test('a webhook triggers a sync for its connection', async () => {
   });
   assert.equal(response.statusCode, 202);
   assert.equal(response.json().sync.workItems, 2);
+});
+
+test('a poll reads only what changed since the last sync, newest first', async () => {
+  const { manager } = await seed();
+  await connect(VALID_TOKEN, manager.email);
+  plane.requests.length = 0;
+
+  const fresh = recentIso(30_000);
+  const stale = recentIso(6 * 60 * 60 * 1000);
+  projectIssues = {
+    p1: [
+      {
+        id: 'i-fresh',
+        sequence_id: 100,
+        name: 'Just changed',
+        state_detail: { group: 'backlog' },
+        updated_at: fresh,
+      },
+      ...Array.from({ length: 150 }, (_, index) => ({
+        id: `i-old-${index}`,
+        sequence_id: 200 + index,
+        name: `Old ${index}`,
+        state_detail: { group: 'backlog' },
+        updated_at: stale,
+      })),
+    ],
+    p2: [],
+  };
+
+  const db = getDb();
+  // Clear the rows the full connect wrote so the poll's own writes are visible.
+  await db.query('DELETE FROM work_items');
+  const connection = (await listActiveConnections(db))[0]!;
+  const summary = await syncConnection(
+    db,
+    connection,
+    parseEncryptionKey('a'.repeat(64)),
+    'poll',
+    { lookbackSeconds: 600 },
+  );
+
+  assert.equal(summary.workItems, 1, 'only the changed work item is read');
+  const p1Requests = plane.requests.filter((request) =>
+    request.url.startsWith('/api/v1/workspaces/atakumi/projects/p1/issues/'),
+  );
+  assert.equal(
+    p1Requests.length,
+    1,
+    'paging stops at the first item older than the watermark',
+  );
+  assert.ok(p1Requests[0]!.url.includes('order_by=-updated_at'));
+  assert.ok(p1Requests[0]!.url.includes('per_page='));
+
+  const stored = await db.query<{ plane_work_item_id: string }>(
+    'SELECT plane_work_item_id FROM work_items WHERE organisation_id = $1 ORDER BY plane_work_item_id',
+    [connection.organisation_id],
+  );
+  assert.deepEqual(
+    stored.map((row) => row.plane_work_item_id),
+    ['i-fresh'],
+    'the stale items are neither read nor rewritten',
+  );
 });
 
 test('removing a member stops their Plane sync and keeps their entries', async () => {
