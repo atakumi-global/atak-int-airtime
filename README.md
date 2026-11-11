@@ -304,6 +304,15 @@ recorded as `partial`, the workspace shows its error, and member access is left
 as it was (nothing is revoked on a failed read). When every workspace fails the
 sync fails. Airtime only ever issues `GET` requests to Plane.
 
+Connecting and a manual sync read every work item. A poll and a webhook read
+only what changed: Plane's Community API has no `updated_at` filter, so the work
+items are requested ordered by `updated_at` descending in small pages and paging
+stops at the first item older than the workspace's last successful sync minus
+`SYNC_LOOKBACK_SECONDS` (default 600). A quiet project therefore costs one small
+request instead of its whole history, while anything changed within the lookback
+window is still read. The watermark is each workspace's `last_synced_at`; a
+workspace that has never synced is read in full.
+
 Plane registers webhooks per workspace (`workspace_webhooks`), and every delivery
 names its workspace (`workspace_id` and `workspace_slug` in the payload; the
 signature is an HMAC with that webhook's own secret). Each configured workspace

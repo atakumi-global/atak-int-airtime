@@ -10,6 +10,7 @@ export type AppConfig = {
   tokenEncryptionKey: string | null;
   corsOrigins: string[];
   syncPollSeconds: number;
+  syncLookbackSeconds: number;
   syncPollEnabled: boolean;
   accessRecheckSeconds: number;
   accessMaxStaleSeconds: number;
@@ -78,6 +79,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .map((origin) => origin.trim())
       .filter(Boolean),
     syncPollSeconds: Number(env.SYNC_POLL_SECONDS ?? 60),
+    syncLookbackSeconds: positiveNumber(
+      env.SYNC_LOOKBACK_SECONDS,
+      600,
+      'SYNC_LOOKBACK_SECONDS',
+    ),
     syncPollEnabled: (env.SYNC_POLL_ENABLED ?? 'true') !== 'false',
     accessRecheckSeconds: positiveNumber(env.ACCESS_RECHECK_SECONDS, 60, 'ACCESS_RECHECK_SECONDS'),
     accessMaxStaleSeconds: positiveNumber(
