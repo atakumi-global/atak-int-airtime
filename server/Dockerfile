@@ -1,4 +1,5 @@
 FROM node:22-alpine AS build
+RUN npm install -g npm@11.21.2
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -9,6 +10,7 @@ COPY server ./server
 RUN npm run build -w server
 
 FROM node:22-alpine AS runtime
+RUN npm install -g npm@11.21.2
 WORKDIR /app
 ENV NODE_ENV=production
 
