@@ -200,6 +200,16 @@ INTAIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   checks that the database port listens and otherwise recreates the services (volumes
   and data kept). Test: `server/test/stack.test.ts`.
 
+- **INTAIRTIME-102** (dev fails factory-check) — `desktop/src-tauri/Cargo.lock` pinned
+  `quinn-proto` 0.11.18 and `quinn-udp` 0.5.15, both flagged by osv-scanner
+  (RUSTSEC-2026-0523, RUSTSEC-2026-0524, RUSTSEC-2026-0538). Updated to 0.11.19 and
+  0.5.16 with `cargo update -p quinn-proto -p quinn-udp`; regenerating the lock also
+  corrected a few dependency edges (`syn`, `windows-sys`) that pointed at versions the
+  crates' registry metadata does not allow. `factory-check` and the gate pass on `dev`.
+  Note for the owner: `osv-scanner.toml` reports an unused ignore for
+  RUSTSEC-2024-0429 (already covered by its GHSA alias); the file is governed and was
+  left untouched.
+
 ## Remaining work, in order
 
 1. Push the stack (`feature/INTAIRTIME-31`..`33`) and open PRs into `dev`; promote
