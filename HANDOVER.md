@@ -210,6 +210,20 @@ INTAIRTIME-1, 3, 4, 5, 7, 8, 9, 10, 16, 17–24, 26, 31, 32, 33, 53, 55.
   RUSTSEC-2024-0429 (already covered by its GHSA alias); the file is governed and was
   left untouched.
 
+- **INTAIRTIME-101** (update server) — the Coolify report named `brace-expansion 2.0.2`,
+  `ip-address 10.1.0`, `picomatch 4.0.3`, `pacote 19.0.2` and `sigstore 3.1.0` against the
+  `server` image. These are not application dependencies: they are bundled inside the npm
+  CLI that `node:22-alpine` ships (`npm 10.9.9`), so no lockfile or `overrides` entry can
+  reach them. `server/Dockerfile` now runs `npm install -g npm@11.21.2` in both the build
+  and runtime stages (commit `855d897`), which carries fixed copies (brace-expansion
+  5.0.12, ip-address 10.7.5, picomatch 4.0.4, pacote 21.5.2, sigstore 4.1.1). Base images
+  are unchanged and stay major-pinned (`node:22-alpine`, `postgres:16-alpine`), not
+  digest-pinned, so Coolify's "pull latest `postgres:16-alpine`" action can pick up the
+  patched Postgres build; Postgres major 16 is untouched. Landed on `dev` as merge
+  `376c03b`. The Postgres pull and redeploy are a Coolify action, not repository code:
+  the owner must redeploy the server application in Coolify after this reaches
+  `dev`/`stage`/`prod` to pick up the rebuilt image.
+
 ## Remaining work, in order
 
 1. Push the stack (`feature/INTAIRTIME-31`..`33`) and open PRs into `dev`; promote
